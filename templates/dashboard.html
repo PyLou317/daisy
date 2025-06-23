@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Staffing Agency Platform{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="text-primary">
+        <i data-feather="home" class="me-2"></i>Dashboard
+    </h1>
+    <div>
+        <a href="{{ url_for('contractors.add_contractor') }}" class="btn btn-primary">
+            <i data-feather="plus" class="me-1"></i>Add Contractor
+        </a>
+        <a href="{{ url_for('main.upload_csv') }}" class="btn btn-outline-primary">
+            <i data-feather="upload" class="me-1"></i>Upload CSV
+        </a>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Contractors
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_contractors }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i data-feather="users" class="text-primary" style="width: 24px; height: 24px;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Active Contractors
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_contractors }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i data-feather="user-check" class="text-success" style="width: 24px; height: 24px;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Pending Reviews
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pending_reviews }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i data-feather="eye" class="text-warning" style="width: 24px; height: 24px;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Monthly Revenue
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">${{ "%.2f"|format(monthly_revenue) }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i data-feather="dollar-sign" class="text-info" style="width: 24px; height: 24px;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Top Contractors by Spread -->
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i data-feather="trending-up" class="me-2"></i>Top Contractors by Spread
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if top_contractors %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Job Title</th>
+                                    <th>Account</th>
+                                    <th>Spread</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contractor in top_contractors %}
+                                <tr>
+                                    <td>{{ contractor.talent_name }}</td>
+                                    <td>{{ contractor.job_title or '-' }}</td>
+                                    <td>{{ contractor.account_name or '-' }}</td>
+                                    <td>${{ "%.2f"|format(contractor.spread_amount) if contractor.spread_amount else '0.00' }}</td>
+                                    <td>
+                                        <a href="{{ url_for('contractors.view_contractor', id=contractor.id) }}" 
+                                           class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i data-feather="users" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+                        <p class="text-muted">No contractors with spread data found.</p>
+                        <a href="{{ url_for('contractors.add_contractor') }}" class="btn btn-primary">
+                            Add First Contractor
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Uploads -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i data-feather="upload" class="me-2"></i>Recent Uploads
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if recent_uploads %}
+                    {% for upload in recent_uploads %}
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            {% if upload.status == 'completed' %}
+                                <i data-feather="check-circle" class="text-success"></i>
+                            {% else %}
+                                <i data-feather="x-circle" class="text-danger"></i>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="small font-weight-bold">{{ upload.filename }}</div>
+                            <div class="small text-muted">
+                                {{ upload.uploaded_at.strftime('%m/%d/%Y %I:%M %p') }}
+                                <br>
+                                {% if upload.status == 'completed' %}
+                                    {{ upload.records_processed }} records processed
+                                {% else %}
+                                    Failed: {{ upload.error_message[:50] }}...
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i data-feather="upload" class="text-muted mb-3" style="width: 32px; height: 32px;"></i>
+                        <p class="text-muted small">No uploads yet.</p>
+                        <a href="{{ url_for('main.upload_csv') }}" class="btn btn-sm btn-primary">
+                            Upload CSV
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

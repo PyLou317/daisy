@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Upload CSV - Staffing Agency Platform{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header">
+                <h4 class="mb-0 text-primary">
+                    <i data-feather="upload" class="me-2"></i>Upload Spread Report CSV
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i data-feather="info" class="me-2"></i>
+                    <strong>Upload Instructions:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Upload your weekly spread report in CSV format</li>
+                        <li>The system will automatically add new contractors and update existing ones</li>
+                        <li>Contractors not found in the upload will be queued for review</li>
+                        <li>Maximum file size: 16MB</li>
+                    </ul>
+                </div>
+                
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-4">
+                        {{ form.file.label(class="form-label") }}
+                        {{ form.file(class="form-control") }}
+                        {% if form.file.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.file.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">
+                            Accepted formats: .csv
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control", rows="3", placeholder="Optional notes about this upload...") }}
+                        {% if form.description.errors %}
+                            <div class="text-danger small mt-1">
+                                {% for error in form.description.errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Expected CSV Format -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">Expected CSV Columns:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Column Name</th>
+                                        <th>Description</th>
+                                        <th>Required</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>Talent Name</code></td>
+                                        <td>Full name of the contractor</td>
+                                        <td><span class="badge bg-danger">Yes</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Job Title</code></td>
+                                        <td>Position/role title</td>
+                                        <td><span class="badge bg-secondary">No</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Candidate Status</code></td>
+                                        <td>Current, Inactive, Pending, etc.</td>
+                                        <td><span class="badge bg-secondary">No</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Talent Start Date</code></td>
+                                        <td>Contract start date (MM/DD/YYYY)</td>
+                                        <td><span class="badge bg-secondary">No</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Talent End Date</code></td>
+                                        <td>Contract end date (MM/DD/YYYY)</td>
+                                        <td><span class="badge bg-secondary">No</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Mobile</code></td>
+                                        <td>Phone number</td>
+                                        <td><span class="badge bg-secondary">No</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Talent ID</code></td>
+                                        <td>Unique identifier</td>
+                                        <td><span class="badge bg-warning">Recommended</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Account Name</code></td>
+                                        <td>Client company name</td>
+                                        <td><span class="badge bg-secondary">No</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Recruiter</code></td>
+                                        <td>Assigned recruiter</td>
+                                        <td><span class="badge bg-secondary">No</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Account Manager</code></td>
+                                        <td>Assigned account manager</td>
+                                        <td><span class="badge bg-secondary">No</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary me-2">
+                            <i data-feather="x" class="me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="upload" class="me-1"></i>Upload and Process
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.querySelector('input[type="file"]');
+    const form = document.querySelector('form');
+    
+    form.addEventListener('submit', function(e) {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i data-feather="loader" class="me-1"></i>Processing...';
+        
+        // Re-initialize feather icons for the new icon
+        setTimeout(() => feather.replace(), 100);
+    });
+    
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const fileSize = file.size / 1024 / 1024; // Size in MB
+            if (fileSize > 16) {
+                alert('File size exceeds 16MB limit. Please choose a smaller file.');
+                e.target.value = '';
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

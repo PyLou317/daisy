@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Review Queue - Staffing Agency Platform{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="text-primary">
+        <i data-feather="eye" class="me-2"></i>Review Queue
+        {% if pending_reviews %}
+            <span class="badge bg-warning text-dark ms-2">{{ pending_reviews|length }}</span>
+        {% endif %}
+    </h1>
+</div>
+
+{% if pending_reviews %}
+    <div class="alert alert-warning">
+        <i data-feather="alert-triangle" class="me-2"></i>
+        <strong>Action Required:</strong> The following contractors were not found in the latest upload and may need to be removed or updated.
+    </div>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Contractor</th>
+                            <th>Job Title</th>
+                            <th>Account</th>
+                            <th>Reason</th>
+                            <th>Added</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for review in pending_reviews %}
+                        <tr>
+                            <td>
+                                <strong>{{ review.contractor.talent_name }}</strong>
+                                {% if review.contractor.talent_id %}
+                                    <br><small class="text-muted">ID: {{ review.contractor.talent_id }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ review.contractor.job_title or '-' }}</td>
+                            <td>{{ review.contractor.account_name or '-' }}</td>
+                            <td>
+                                <small class="text-muted">{{ review.reason }}</small>
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    {{ review.added_at.strftime('%m/%d/%Y') }}
+                                    {% if review.added_by_user %}
+                                        <br>by {{ review.added_by_user.username }}
+                                    {% endif %}
+                                </small>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('contractors.view_contractor', id=review.contractor.id) }}" 
+                                       class="btn btn-sm btn-outline-primary" title="View Details">
+                                        <i data-feather="eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('main.review_action', review_id=review.id, action='keep') }}" 
+                                       class="btn btn-sm btn-outline-success" title="Keep Active"
+                                       onclick="return confirm('Keep this contractor active?')">
+                                        <i data-feather="check"></i>
+                                    </a>
+                                    <a href="{{ url_for('main.review_action', review_id=review.id, action='remove') }}" 
+                                       class="btn btn-sm btn-outline-danger" title="Mark Inactive"
+                                       onclick="return confirm('Mark this contractor as inactive?')">
+                                        <i data-feather="x"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bulk Actions -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h6 class="card-title text-muted">Bulk Actions</h6>
+            <p class="text-muted small">
+                You can review each contractor individually using the actions above, or contact your administrator for bulk operations.
+            </p>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-success" onclick="bulkAction('keep')">
+                    <i data-feather="check-circle" class="me-1"></i>Keep All Active
+                </button>
+                <button class="btn btn-outline-danger" onclick="bulkAction('remove')">
+                    <i data-feather="x-circle" class="me-1"></i>Mark All Inactive
+                </button>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="card shadow">
+        <div class="card-body text-center py-5">
+            <i data-feather="check-circle" class="text-success mb-3" style="width: 64px; height: 64px;"></i>
+            <h4 class="text-success">All Clear!</h4>
+            <p class="text-muted">There are no contractors pending review at this time.</p>
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">
+                <i data-feather="home" class="me-1"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function bulkAction(action) {
+    const actionText = action === 'keep' ? 'keep all contractors active' : 'mark all contractors as inactive';
+    if (!confirm(`Are you sure you want to ${actionText}?`)) {
+        return;
+    }
+    
+    const reviewIds = [];
+    {% for review in pending_reviews %}
+        reviewIds.push({{ review.id }});
+    {% endfor %}
+    
+    // Process each review item
+    let processed = 0;
+    const total = reviewIds.length;
+    
+    reviewIds.forEach((reviewId, index) => {
+        setTimeout(() => {
+            window.location.href = `{{ url_for('main.review_action', review_id=0, action='') }}`.replace('0', reviewId).replace('action/', `action/${action}`);
+        }, index * 100); // Stagger requests slightly
+    });
+}
+</script>
+{% endblock %}

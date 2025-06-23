@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}{{ contractor.talent_name }} - Staffing Agency Platform{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0 text-primary">
+                    <i data-feather="user" class="me-2"></i>{{ contractor.talent_name }}
+                </h4>
+                <div>
+                    {% if contractor.candidate_status == 'Current' %}
+                        <span class="badge bg-success fs-6">{{ contractor.candidate_status }}</span>
+                    {% elif contractor.candidate_status == 'Inactive' %}
+                        <span class="badge bg-secondary fs-6">{{ contractor.candidate_status }}</span>
+                    {% elif contractor.candidate_status == 'Pending' %}
+                        <span class="badge bg-warning fs-6">{{ contractor.candidate_status }}</span>
+                    {% else %}
+                        <span class="badge bg-danger fs-6">{{ contractor.candidate_status }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Basic Information -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-3">Basic Information</h6>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td class="fw-bold">Name:</td>
+                                <td>{{ contractor.talent_name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Job Title:</td>
+                                <td>{{ contractor.job_title or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Talent ID:</td>
+                                <td>{{ contractor.talent_id or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Mobile:</td>
+                                <td>{{ contractor.mobile or '-' }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-3">Contract Details</h6>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td class="fw-bold">Start Date:</td>
+                                <td>{{ contractor.talent_start_date.strftime('%m/%d/%Y') if contractor.talent_start_date else '-' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">End Date:</td>
+                                <td>{{ contractor.talent_end_date.strftime('%m/%d/%Y') if contractor.talent_end_date else '-' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Duration:</td>
+                                <td>
+                                    {% if contractor.contract_duration_days %}
+                                        {{ contractor.contract_duration_days }} days
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Days Since Service:</td>
+                                <td>{{ contractor.days_since_service or '-' }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Account and Financial Information -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-3">Account Information</h6>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td class="fw-bold">Account Name:</td>
+                                <td>{{ contractor.account_name or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Account Manager:</td>
+                                <td>{{ contractor.account_manager or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Recruiter:</td>
+                                <td>{{ contractor.recruiter or '-' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Peoplesoft ID:</td>
+                                <td>{{ contractor.peoplesoft_id or '-' }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-3">Financial Information</h6>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td class="fw-bold">Spread Amount:</td>
+                                <td>
+                                    {% if contractor.spread_amount %}
+                                        <span class="text-success fw-bold">${{ "%.2f"|format(contractor.spread_amount) }}</span>
+                                    {% else %}
+                                        <span class="text-muted">Not set</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Mobile Opt-out:</td>
+                                <td>{{ contractor.opt_out_mobile or 'No' }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Metadata -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="text-muted mb-3">Record Information</h6>
+                        <table class="table table-borderless">
+                            <tr>
+                                <td class="fw-bold">Created:</td>
+                                <td>{{ contractor.created_at.strftime('%m/%d/%Y at %I:%M %p') }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Last Updated:</td>
+                                <td>{{ contractor.updated_at.strftime('%m/%d/%Y at %I:%M %p') }}</td>
+                            </tr>
+                            {% if contractor.creator %}
+                            <tr>
+                                <td class="fw-bold">Created By:</td>
+                                <td>{{ contractor.creator.full_name or contractor.creator.username }}</td>
+                            </tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('contractors.list_contractors') }}" class="btn btn-outline-secondary">
+                        <i data-feather="arrow-left" class="me-1"></i>Back to List
+                    </a>
+                    
+                    <div>
+                        <a href="{{ url_for('contractors.edit_contractor', id=contractor.id) }}" class="btn btn-primary">
+                            <i data-feather="edit" class="me-1"></i>Edit Contractor
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

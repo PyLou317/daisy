@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Add Contractor - Staffing Agency Platform{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header">
+                <h4 class="mb-0 text-primary">
+                    <i data-feather="plus" class="me-2"></i>Add New Contractor
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.talent_name.label(class="form-label") }}
+                            {{ form.talent_name(class="form-control") }}
+                            {% if form.talent_name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.talent_name.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.job_title.label(class="form-label") }}
+                            {{ form.job_title(class="form-control") }}
+                            {% if form.job_title.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.job_title.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ form.candidate_status.label(class="form-label") }}
+                            {{ form.candidate_status(class="form-select") }}
+                            {% if form.candidate_status.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.candidate_status.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            {{ form.talent_start_date.label(class="form-label") }}
+                            {{ form.talent_start_date(class="form-control") }}
+                            {% if form.talent_start_date.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.talent_start_date.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            {{ form.talent_end_date.label(class="form-label") }}
+                            {{ form.talent_end_date(class="form-control") }}
+                            {% if form.talent_end_date.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.talent_end_date.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.mobile.label(class="form-label") }}
+                            {{ form.mobile(class="form-control") }}
+                            {% if form.mobile.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.mobile.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.talent_id.label(class="form-label") }}
+                            {{ form.talent_id(class="form-control") }}
+                            {% if form.talent_id.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.talent_id.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.recruiter.label(class="form-label") }}
+                            {{ form.recruiter(class="form-control") }}
+                            {% if form.recruiter.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.recruiter.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.account_manager.label(class="form-label") }}
+                            {{ form.account_manager(class="form-control") }}
+                            {% if form.account_manager.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.account_manager.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            {{ form.account_name.label(class="form-label") }}
+                            {{ form.account_name(class="form-control") }}
+                            {% if form.account_name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.account_name.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            {{ form.spread_amount.label(class="form-label") }}
+                            {{ form.spread_amount(class="form-control") }}
+                            {% if form.spread_amount.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.spread_amount.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ url_for('contractors.list_contractors') }}" class="btn btn-secondary me-2">
+                            <i data-feather="x" class="me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="save" class="me-1"></i>Save Contractor
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

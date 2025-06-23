@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Contractors - Staffing Agency Platform{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="text-primary">
+        <i data-feather="users" class="me-2"></i>Contractors
+    </h1>
+    <a href="{{ url_for('contractors.add_contractor') }}" class="btn btn-primary">
+        <i data-feather="plus" class="me-1"></i>Add Contractor
+    </a>
+</div>
+
+<!-- Search and Filter Bar -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Search</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       placeholder="Name, job title, or account..." value="{{ search }}">
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">All Statuses</option>
+                    <option value="Current" {% if status == 'Current' %}selected{% endif %}>Current</option>
+                    <option value="Inactive" {% if status == 'Inactive' %}selected{% endif %}>Inactive</option>
+                    <option value="Pending" {% if status == 'Pending' %}selected{% endif %}>Pending</option>
+                    <option value="Terminated" {% if status == 'Terminated' %}selected{% endif %}>Terminated</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i data-feather="search" class="me-1"></i>Search
+                </button>
+                <a href="{{ url_for('contractors.list_contractors') }}" class="btn btn-outline-secondary">
+                    <i data-feather="x" class="me-1"></i>Clear
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Contractors Table -->
+<div class="card shadow">
+    <div class="card-body">
+        {% if contractors.items %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Job Title</th>
+                            <th>Status</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Account</th>
+                            <th>Spread</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contractor in contractors.items %}
+                        <tr>
+                            <td>
+                                <strong>{{ contractor.talent_name }}</strong>
+                                {% if contractor.talent_id %}
+                                    <br><small class="text-muted">ID: {{ contractor.talent_id }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ contractor.job_title or '-' }}</td>
+                            <td>
+                                {% if contractor.candidate_status == 'Current' %}
+                                    <span class="badge bg-success">{{ contractor.candidate_status }}</span>
+                                {% elif contractor.candidate_status == 'Inactive' %}
+                                    <span class="badge bg-secondary">{{ contractor.candidate_status }}</span>
+                                {% elif contractor.candidate_status == 'Pending' %}
+                                    <span class="badge bg-warning">{{ contractor.candidate_status }}</span>
+                                {% else %}
+                                    <span class="badge bg-danger">{{ contractor.candidate_status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ contractor.talent_start_date.strftime('%m/%d/%Y') if contractor.talent_start_date else '-' }}</td>
+                            <td>{{ contractor.talent_end_date.strftime('%m/%d/%Y') if contractor.talent_end_date else '-' }}</td>
+                            <td>{{ contractor.account_name or '-' }}</td>
+                            <td>
+                                {% if contractor.spread_amount %}
+                                    ${{ "%.2f"|format(contractor.spread_amount) }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('contractors.view_contractor', id=contractor.id) }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i data-feather="eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('contractors.edit_contractor', id=contractor.id) }}" 
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i data-feather="edit"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if contractors.pages > 1 %}
+            <nav aria-label="Contractors pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if contractors.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('contractors.list_contractors', page=contractors.prev_num, search=search, status=status) }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in contractors.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != contractors.page %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('contractors.list_contractors', page=page_num, search=search, status=status) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if contractors.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('contractors.list_contractors', page=contractors.next_num, search=search, status=status) }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-5">
+                <i data-feather="users" class="text-muted mb-3" style="width: 64px; height: 64px;"></i>
+                <h4 class="text-muted">No contractors found</h4>
+                {% if search or status %}
+                    <p class="text-muted">Try adjusting your search criteria or <a href="{{ url_for('contractors.list_contractors') }}">view all contractors</a>.</p>
+                {% else %}
+                    <p class="text-muted">Get started by adding your first contractor.</p>
+                    <a href="{{ url_for('contractors.add_contractor') }}" class="btn btn-primary">
+                        <i data-feather="plus" class="me-1"></i>Add First Contractor
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
