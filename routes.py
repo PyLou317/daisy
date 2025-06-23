@@ -1,7 +1,8 @@
 import os
 import csv
 import pandas as pd
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
+from dateutil.relativedelta import relativedelta
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
@@ -28,6 +29,9 @@ def index():
 @main_bp.route('/dashboard')
 @login_required
 def dashboard():
+    from datetime import datetime, timedelta
+    from dateutil.relativedelta import relativedelta
+    
     # Get dashboard statistics
     total_contractors = Contractor.query.count()
     active_contractors = Contractor.query.filter_by(candidate_status='Current').count()
@@ -40,6 +44,41 @@ def dashboard():
     top_contractors = Contractor.query.filter_by(candidate_status='Current')\
         .filter(Contractor.spread_amount.isnot(None))\
         .order_by(Contractor.spread_amount.desc()).limit(10).all()
+    
+    # Quarterly analysis
+    today = datetime.now().date()
+    quarter_end = datetime(today.year, ((today.month - 1) // 3 + 1) * 3, 1).date() + relativedelta(months=1) - timedelta(days=1)
+    next_quarter_end = quarter_end + relativedelta(months=3)
+    
+    # Contractors falling off this quarter
+    falling_off_this_quarter = Contractor.query.filter(
+        Contractor.candidate_status == 'Current',
+        Contractor.talent_end_date.isnot(None),
+        Contractor.talent_end_date <= quarter_end,
+        Contractor.talent_end_date >= today
+    ).all()
+    
+    # Calculate spread falling off this quarter
+    spread_falling_off = sum(c.spread_amount for c in falling_off_this_quarter if c.spread_amount) or 0
+    
+    # Current active spread
+    current_active_spread = db.session.query(func.sum(Contractor.spread_amount))\
+        .filter(Contractor.candidate_status == 'Current')\
+        .filter(Contractor.spread_amount.isnot(None))\
+        .scalar() or 0
+    
+    # Projected next quarter spread (current minus falling off)
+    next_quarter_spread = current_active_spread - spread_falling_off
+    
+    # Client distribution
+    client_distribution = db.session.query(
+        Contractor.account_name,
+        func.count(Contractor.id).label('contractor_count'),
+        func.sum(Contractor.spread_amount).label('total_spread')
+    ).filter(
+        Contractor.candidate_status == 'Current'
+    ).group_by(Contractor.account_name)\
+     .order_by(func.count(Contractor.id).desc()).all()
     
     # Monthly statistics
     current_month = datetime.now().month
@@ -55,7 +94,13 @@ def dashboard():
                          pending_reviews=pending_reviews,
                          recent_uploads=recent_uploads,
                          top_contractors=top_contractors,
-                         monthly_revenue=monthly_revenue)
+                         monthly_revenue=monthly_revenue,
+                         falling_off_this_quarter=falling_off_this_quarter,
+                         spread_falling_off=spread_falling_off,
+                         current_active_spread=current_active_spread,
+                         next_quarter_spread=next_quarter_spread,
+                         client_distribution=client_distribution,
+                         quarter_end=quarter_end)
 
 @main_bp.route('/upload', methods=['GET', 'POST'])
 @login_required
@@ -255,3 +300,73 @@ def delete_contractor(id):
     
     flash('Contractor has been queued for review.', 'info')
     return redirect(url_for('contractors.list_contractors'))
+
+@main_bp.route('/analytics')
+@login_required
+def analytics():
+    """Detailed analytics page for quarterly forecasting and client analysis"""
+    today = datetime.now().date()
+    
+    # Calculate quarters
+    current_quarter = ((today.month - 1) // 3) + 1
+    quarter_end = datetime(today.year, current_quarter * 3, 1).date() + relativedelta(months=1) - timedelta(days=1)
+    next_quarter_start = quarter_end + timedelta(days=1)
+    next_quarter_end = quarter_end + relativedelta(months=3)
+    
+    # Contractors ending this quarter
+    ending_this_quarter = Contractor.query.filter(
+        Contractor.candidate_status == 'Current',
+        Contractor.talent_end_date.isnot(None),
+        Contractor.talent_end_date <= quarter_end,
+        Contractor.talent_end_date >= today
+    ).order_by(Contractor.talent_end_date).all()
+    
+    # Contractors ending next quarter
+    ending_next_quarter = Contractor.query.filter(
+        Contractor.candidate_status == 'Current',
+        Contractor.talent_end_date.isnot(None),
+        Contractor.talent_end_date <= next_quarter_end,
+        Contractor.talent_end_date > quarter_end
+    ).order_by(Contractor.talent_end_date).all()
+    
+    # Calculate spreads
+    current_quarter_loss = sum(c.spread_amount for c in ending_this_quarter if c.spread_amount) or 0
+    next_quarter_loss = sum(c.spread_amount for c in ending_next_quarter if c.spread_amount) or 0
+    
+    # Current total spread
+    current_total_spread = db.session.query(func.sum(Contractor.spread_amount))\
+        .filter(Contractor.candidate_status == 'Current')\
+        .filter(Contractor.spread_amount.isnot(None))\
+        .scalar() or 0
+    
+    # Projections
+    end_of_quarter_spread = current_total_spread - current_quarter_loss
+    end_of_next_quarter_spread = end_of_quarter_spread - next_quarter_loss
+    
+    # Client analysis with detailed breakdown
+    client_stats = db.session.query(
+        Contractor.account_name,
+        func.count(Contractor.id).label('total_contractors'),
+        func.sum(func.case([(Contractor.candidate_status == 'Current', 1)], else_=0)).label('active_contractors'),
+        func.sum(Contractor.spread_amount).label('total_spread'),
+        func.avg(Contractor.spread_amount).label('avg_spread'),
+        func.min(Contractor.talent_start_date).label('earliest_start'),
+        func.max(Contractor.talent_end_date).label('latest_end')
+    ).filter(
+        Contractor.account_name.isnot(None),
+        Contractor.account_name != ''
+    ).group_by(Contractor.account_name)\
+     .order_by(func.sum(Contractor.spread_amount).desc()).all()
+    
+    return render_template('analytics.html',
+                         ending_this_quarter=ending_this_quarter,
+                         ending_next_quarter=ending_next_quarter,
+                         current_quarter_loss=current_quarter_loss,
+                         next_quarter_loss=next_quarter_loss,
+                         current_total_spread=current_total_spread,
+                         end_of_quarter_spread=end_of_quarter_spread,
+                         end_of_next_quarter_spread=end_of_next_quarter_spread,
+                         client_stats=client_stats,
+                         quarter_end=quarter_end,
+                         next_quarter_end=next_quarter_end,
+                         current_quarter=current_quarter)

@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Staffing Agency Platform{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="text-primary">
+        <i data-feather="trending-up" class="me-2"></i>Analytics & Forecasting
+    </h1>
+    <div class="text-muted">
+        Q{{ current_quarter }} {{ quarter_end.year }} Analysis
+    </div>
+</div>
+
+<!-- Quarterly Forecast Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Current Active Spread
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">${{ "%.2f"|format(current_total_spread) }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i data-feather="dollar-sign" class="text-info" style="width: 24px; height: 24px;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Q{{ current_quarter }} Spread Loss
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">-${{ "%.2f"|format(current_quarter_loss) }}</div>
+                        <div class="small text-muted">{{ ending_this_quarter|length }} contractors ending</div>
+                    </div>
+                    <div class="col-auto">
+                        <i data-feather="trending-down" class="text-warning" style="width: 24px; height: 24px;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            End of Q{{ current_quarter }} Spread
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">${{ "%.2f"|format(end_of_quarter_spread) }}</div>
+                        <div class="small text-muted">{{ "%.1f"|format((end_of_quarter_spread/current_total_spread*100) if current_total_spread > 0 else 0) }}% retention</div>
+                    </div>
+                    <div class="col-auto">
+                        <i data-feather="target" class="text-success" style="width: 24px; height: 24px;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Q{{ current_quarter + 1 }} Projected Spread
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">${{ "%.2f"|format(end_of_next_quarter_spread) }}</div>
+                        <div class="small text-muted">After {{ ending_next_quarter|length }} more endings</div>
+                    </div>
+                    <div class="col-auto">
+                        <i data-feather="calendar" class="text-primary" style="width: 24px; height: 24px;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Contracts Ending This Quarter -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-warning">
+                    <i data-feather="alert-triangle" class="me-2"></i>Contracts Ending Q{{ current_quarter }} (by {{ quarter_end.strftime('%m/%d/%Y') }})
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if ending_this_quarter %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Contractor</th>
+                                    <th>Client</th>
+                                    <th>End Date</th>
+                                    <th>Spread</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contractor in ending_this_quarter %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('contractors.view_contractor', id=contractor.id) }}" class="text-decoration-none">
+                                            {{ contractor.talent_name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ contractor.account_name or '-' }}</td>
+                                    <td>
+                                        <span class="badge bg-warning text-dark">
+                                            {{ contractor.talent_end_date.strftime('%m/%d/%Y') if contractor.talent_end_date else '-' }}
+                                        </span>
+                                    </td>
+                                    <td>${{ "%.2f"|format(contractor.spread_amount) if contractor.spread_amount else '0.00' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-warning">
+                                    <td colspan="3"><strong>Total Q{{ current_quarter }} Loss:</strong></td>
+                                    <td><strong>${{ "%.2f"|format(current_quarter_loss) }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i data-feather="check-circle" class="text-success mb-3" style="width: 48px; height: 48px;"></i>
+                        <h5 class="text-success">No Contracts Ending This Quarter!</h5>
+                        <p class="text-muted">All current contractors are extended beyond {{ quarter_end.strftime('%m/%d/%Y') }}.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Contracts Ending Next Quarter -->
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-info">
+                    <i data-feather="calendar" class="me-2"></i>Contracts Ending Q{{ current_quarter + 1 }} (by {{ next_quarter_end.strftime('%m/%d/%Y') }})
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if ending_next_quarter %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Contractor</th>
+                                    <th>Client</th>
+                                    <th>End Date</th>
+                                    <th>Spread</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contractor in ending_next_quarter %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('contractors.view_contractor', id=contractor.id) }}" class="text-decoration-none">
+                                            {{ contractor.talent_name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ contractor.account_name or '-' }}</td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            {{ contractor.talent_end_date.strftime('%m/%d/%Y') if contractor.talent_end_date else '-' }}
+                                        </span>
+                                    </td>
+                                    <td>${{ "%.2f"|format(contractor.spread_amount) if contractor.spread_amount else '0.00' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-info">
+                                    <td colspan="3"><strong>Total Q{{ current_quarter + 1 }} Loss:</strong></td>
+                                    <td><strong>${{ "%.2f"|format(next_quarter_loss) }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i data-feather="check-circle" class="text-success mb-3" style="width: 48px; height: 48px;"></i>
+                        <h5 class="text-success">No Contracts Ending Next Quarter!</h5>
+                        <p class="text-muted">All contractors are extended beyond {{ next_quarter_end.strftime('%m/%d/%Y') }}.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Client Distribution Analysis -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i data-feather="pie-chart" class="me-2"></i>Client Distribution & Analysis
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if client_stats %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Client</th>
+                                    <th>Active Contractors</th>
+                                    <th>Total Spread</th>
+                                    <th>Avg Spread</th>
+                                    <th>Earliest Start</th>
+                                    <th>Latest End</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for client in client_stats %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ client.account_name or 'Unknown Client' }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ client.active_contractors }}</span>
+                                        {% if client.total_contractors > client.active_contractors %}
+                                            <small class="text-muted">({{ client.total_contractors }} total)</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">${{ "%.2f"|format(client.total_spread) if client.total_spread else '0.00' }}</strong>
+                                    </td>
+                                    <td>${{ "%.2f"|format(client.avg_spread) if client.avg_spread else '0.00' }}</td>
+                                    <td>{{ client.earliest_start.strftime('%m/%d/%Y') if client.earliest_start else '-' }}</td>
+                                    <td>{{ client.latest_end.strftime('%m/%d/%Y') if client.latest_end else '-' }}</td>
+                                    <td>
+                                        <a href="{{ url_for('contractors.list_contractors') }}?search={{ client.account_name }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i data-feather="users"></i> View All
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Summary Statistics -->
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h5 class="text-primary">{{ client_stats|length }}</h5>
+                                <small class="text-muted">Active Clients</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h5 class="text-success">${{ "%.2f"|format(client_stats|sum(attribute='total_spread') or 0) }}</h5>
+                                <small class="text-muted">Total Client Spread</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h5 class="text-info">{{ client_stats|sum(attribute='active_contractors') or 0 }}</h5>
+                                <small class="text-muted">Total Active Placements</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h5 class="text-warning">${{ "%.2f"|format((client_stats|sum(attribute='total_spread') or 0) / (client_stats|length) if client_stats|length > 0 else 0) }}</h5>
+                                <small class="text-muted">Avg Client Value</small>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i data-feather="pie-chart" class="text-muted mb-3" style="width: 64px; height: 64px;"></i>
+                        <h4 class="text-muted">No Client Data Available</h4>
+                        <p class="text-muted">Upload contractor data to see client distribution analysis.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

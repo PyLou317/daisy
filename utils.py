@@ -166,6 +166,7 @@ def create_contractor_from_csv(row, user_id):
             peoplesoft_id=row.get('Peoplesoft ID', '').strip(),
             account_manager=row.get('Account Manager', '').strip(),
             account_name=row.get('Account Name', '').strip(),
+            spread_amount=parse_decimal(row.get('Spread Amount', '') or row.get('Weekly Spread', '') or row.get('Spread', '')),
             days_since_service=int(row.get('Days Since Service', 0)) if row.get('Days Since Service', '').strip().isdigit() else 0,
             opt_out_mobile=row.get('PrefCentre_Aerotek_OptOut_Mobile', 'No').strip(),
             created_by=user_id
@@ -190,6 +191,11 @@ def update_contractor_from_csv(contractor, row):
         contractor.account_name = row.get('Account Name', contractor.account_name).strip()
         contractor.opt_out_mobile = row.get('PrefCentre_Aerotek_OptOut_Mobile', contractor.opt_out_mobile).strip()
         contractor.updated_at = datetime.utcnow()
+        
+        # Update spread amount if provided
+        spread_amount = parse_decimal(row.get('Spread Amount', '') or row.get('Weekly Spread', '') or row.get('Spread', ''))
+        if spread_amount is not None:
+            contractor.spread_amount = spread_amount
         
         days_since = row.get('Days Since Service', '').strip()
         if days_since.isdigit():

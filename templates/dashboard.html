@@ -79,9 +79,9 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Monthly Revenue
+                            Current Active Spread
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">${{ "%.2f"|format(monthly_revenue) }}</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">${{ "%.2f"|format(current_active_spread) }}</div>
                     </div>
                     <div class="col-auto">
                         <i data-feather="dollar-sign" class="text-info" style="width: 24px; height: 24px;"></i>
@@ -93,52 +93,63 @@
 </div>
 
 <div class="row">
-    <!-- Top Contractors by Spread -->
+    <!-- Quarterly Forecast -->
     <div class="col-lg-8 mb-4">
         <div class="card shadow">
-            <div class="card-header py-3">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
                 <h6 class="m-0 font-weight-bold text-primary">
-                    <i data-feather="trending-up" class="me-2"></i>Top Contractors by Spread
+                    <i data-feather="trending-up" class="me-2"></i>Quarterly Forecast
                 </h6>
+                <a href="{{ url_for('main.analytics') }}" class="btn btn-sm btn-outline-primary">
+                    <i data-feather="bar-chart-2" class="me-1"></i>View Details
+                </a>
             </div>
             <div class="card-body">
-                {% if top_contractors %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Job Title</th>
-                                    <th>Account</th>
-                                    <th>Spread</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for contractor in top_contractors %}
-                                <tr>
-                                    <td>{{ contractor.talent_name }}</td>
-                                    <td>{{ contractor.job_title or '-' }}</td>
-                                    <td>{{ contractor.account_name or '-' }}</td>
-                                    <td>${{ "%.2f"|format(contractor.spread_amount) if contractor.spread_amount else '0.00' }}</td>
-                                    <td>
-                                        <a href="{{ url_for('contractors.view_contractor', id=contractor.id) }}" 
-                                           class="btn btn-sm btn-outline-primary">View</a>
-                                    </td>
-                                </tr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-warning">Contracts Ending This Quarter</h6>
+                        {% if falling_off_this_quarter %}
+                            <p class="mb-2"><strong>{{ falling_off_this_quarter|length }}</strong> contractors ending by {{ quarter_end.strftime('%m/%d/%Y') }}</p>
+                            <p class="mb-2">Spread Loss: <span class="text-danger"><strong>-${{ "%.2f"|format(spread_falling_off) }}</strong></span></p>
+                            <div class="mt-3">
+                                {% for contractor in falling_off_this_quarter[:5] %}
+                                <div class="d-flex justify-content-between border-bottom py-1">
+                                    <span class="small">{{ contractor.talent_name }}</span>
+                                    <span class="small text-warning">{{ contractor.talent_end_date.strftime('%m/%d') if contractor.talent_end_date }}</span>
+                                </div>
                                 {% endfor %}
-                            </tbody>
-                        </table>
+                                {% if falling_off_this_quarter|length > 5 %}
+                                <div class="text-center mt-2">
+                                    <small class="text-muted">and {{ falling_off_this_quarter|length - 5 }} more...</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <p class="text-success">No contracts ending this quarter!</p>
+                        {% endif %}
                     </div>
-                {% else %}
-                    <div class="text-center py-4">
-                        <i data-feather="users" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
-                        <p class="text-muted">No contractors with spread data found.</p>
-                        <a href="{{ url_for('contractors.add_contractor') }}" class="btn btn-primary">
-                            Add First Contractor
-                        </a>
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Projected Next Quarter</h6>
+                        <p class="mb-2">Projected Spread: <span class="text-success"><strong>${{ "%.2f"|format(next_quarter_spread) }}</strong></span></p>
+                        <p class="mb-2">Retention Rate: <span class="text-info"><strong>{{ "%.1f"|format((next_quarter_spread/current_active_spread*100) if current_active_spread > 0 else 0) }}%</strong></span></p>
+                        
+                        <!-- Top Clients by Contractor Count -->
+                        <h6 class="mt-3 text-info">Top Clients</h6>
+                        {% if client_distribution %}
+                            {% for client in client_distribution[:5] %}
+                            <div class="d-flex justify-content-between border-bottom py-1">
+                                <span class="small">{{ client.account_name or 'Unknown' }}</span>
+                                <span class="small">
+                                    <span class="badge bg-primary">{{ client.contractor_count }}</span>
+                                    ${{ "%.0f"|format(client.total_spread or 0) }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted small">No client data available</p>
+                        {% endif %}
                     </div>
-                {% endif %}
+                </div>
             </div>
         </div>
     </div>

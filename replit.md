@@ -113,8 +113,16 @@ StaffingPro is a Flask-based web application designed for staffing agencies to m
 - Pre-ping for connection health checking
 - Debug mode disabled in production
 
+## Recent Changes
+- June 23, 2025: Added comprehensive analytics and quarterly forecasting features
+  - New Analytics page showing contracts ending this quarter and next quarter
+  - Client distribution analysis with contractor counts and spread totals
+  - Enhanced dashboard with quarterly projections and fall-off predictions
+  - Added spread amount parsing from CSV uploads (supports multiple column names)
+  - Improved quarterly calculations using python-dateutil for accurate date math
+
 ## Changelog
-- June 23, 2025. Initial setup
+- June 23, 2025: Initial setup with core contractor management functionality
 
 ## User Preferences
 
