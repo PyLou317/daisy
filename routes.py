@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
-from sqlalchemy import func
+from sqlalchemy import func, case
 from app import db, login_manager
 from models import User, Contractor, ReviewQueue, UploadHistory
 from forms import LoginForm, RegisterForm, ContractorForm, UploadForm
@@ -347,7 +347,7 @@ def analytics():
     client_stats = db.session.query(
         Contractor.account_name,
         func.count(Contractor.id).label('total_contractors'),
-        func.sum(func.case([(Contractor.candidate_status == 'Current', 1)], else_=0)).label('active_contractors'),
+        func.sum(case((Contractor.candidate_status == 'Current', 1), else_=0)).label('active_contractors'),
         func.sum(Contractor.spread_amount).label('total_spread'),
         func.avg(Contractor.spread_amount).label('avg_spread'),
         func.min(Contractor.talent_start_date).label('earliest_start'),
