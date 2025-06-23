@@ -270,19 +270,22 @@
                         </div>
                         <div class="col-md-3">
                             <div class="text-center">
-                                <h5 class="text-success">${{ "%.2f"|format(client_stats|sum(attribute='total_spread') or 0) }}</h5>
+                                {% set total_spread = client_stats|selectattr('total_spread')|map(attribute='total_spread')|sum %}
+                                <h5 class="text-success">${{ "%.2f"|format(total_spread or 0) }}</h5>
                                 <small class="text-muted">Total Client Spread</small>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="text-center">
-                                <h5 class="text-info">{{ client_stats|sum(attribute='active_contractors') or 0 }}</h5>
+                                {% set total_active = client_stats|selectattr('active_contractors')|map(attribute='active_contractors')|sum %}
+                                <h5 class="text-info">{{ total_active or 0 }}</h5>
                                 <small class="text-muted">Total Active Placements</small>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="text-center">
-                                <h5 class="text-warning">${{ "%.2f"|format((client_stats|sum(attribute='total_spread') or 0) / (client_stats|length) if client_stats|length > 0 else 0) }}</h5>
+                                {% set avg_value = (total_spread / (client_stats|length)) if client_stats|length > 0 and total_spread else 0 %}
+                                <h5 class="text-warning">${{ "%.2f"|format(avg_value) }}</h5>
                                 <small class="text-muted">Avg Client Value</small>
                             </div>
                         </div>
