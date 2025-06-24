@@ -114,7 +114,10 @@ StaffingPro is a Flask-based web application designed for staffing agencies to m
 - Debug mode disabled in production
 
 ## Recent Changes
-- June 24, 2025: Simplified registration and added onboarding flow
+- June 24, 2025: Updated color scheme and simplified registration
+  - Applied "Muted Earth & Ash" color palette throughout the application
+  - Updated CSS variables and component styles for sophisticated, calm design
+  - Simplified registration and added onboarding flow
   - Removed username requirement, now only requires email and password
   - Added onboarding flow to collect user's name after registration
   - Updated authentication to use email instead of username
@@ -134,3 +137,8 @@ StaffingPro is a Flask-based web application designed for staffing agencies to m
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Color scheme: Muted Earth & Ash palette - sophisticated and calm with muted tones:
+- Primary Accent: Muted Yellow (#DCCF8E)
+- Main Background: Light Grey (#E0E0E0)  
+- Secondary Elements: Medium Grey (#A8A8A8)
+- Text/Accents: Charcoal (#36454F)

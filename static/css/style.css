@@ -1,18 +1,19 @@
 /* Custom CSS for StaffingPro */
 
 :root {
-    --primary-color: #4f46e5;
-    --primary-dark: #3730a3;
-    --success-color: #059669;
-    --warning-color: #d97706;
-    --danger-color: #dc2626;
-    --info-color: #0891b2;
-    --light-gray: #f8fafc;
-    --medium-gray: #64748b;
-    --dark-gray: #1e293b;
-    --border-color: #e2e8f0;
-    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    /* Muted Earth & Ash Palette */
+    --primary-color: #DCCF8E;         /* Muted Yellow - Primary Accent */
+    --primary-dark: #D1C47E;          /* Darker shade of muted yellow for hover states */
+    --success-color: #8FAE5F;         /* Muted green that fits the palette */
+    --warning-color: #D4B46A;         /* Warm muted yellow-brown for warnings */
+    --danger-color: #B85F5F;          /* Muted red that complements the palette */
+    --info-color: #7A9BB8;            /* Muted blue that fits the earth tones */
+    --light-gray: #E0E0E0;            /* Light Grey - Main Background */
+    --medium-gray: #A8A8A8;           /* Medium Grey - Secondary Background/Elements */
+    --dark-gray: #36454F;             /* Charcoal - Text/Accents */
+    --border-color: #A8A8A8;          /* Medium Grey for borders */
+    --shadow: 0 1px 3px 0 rgba(54, 69, 79, 0.1), 0 1px 2px 0 rgba(54, 69, 79, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(54, 69, 79, 0.1), 0 4px 6px -2px rgba(54, 69, 79, 0.05);
 }
 
 /* Global Styles */
@@ -79,11 +80,13 @@ body {
 .btn-primary {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
+    color: var(--dark-gray);
 }
 
 .btn-primary:hover {
     background-color: var(--primary-dark);
     border-color: var(--primary-dark);
+    color: var(--dark-gray);
 }
 
 .btn-sm {
@@ -101,7 +104,7 @@ body {
 
 .form-control:focus, .form-select:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(220, 207, 142, 0.25);
 }
 
 .form-label {
@@ -131,7 +134,7 @@ body {
 }
 
 .table-hover tbody tr:hover {
-    background-color: rgba(79, 70, 229, 0.05);
+    background-color: rgba(220, 207, 142, 0.1);
 }
 
 /* Badges */
@@ -166,23 +169,27 @@ body {
 }
 
 .alert-info {
-    background-color: rgba(8, 145, 178, 0.1);
-    color: #0c4a6e;
+    background-color: rgba(220, 207, 142, 0.15);
+    color: var(--dark-gray);
+    border: 1px solid rgba(220, 207, 142, 0.3);
 }
 
 .alert-warning {
-    background-color: rgba(217, 119, 6, 0.1);
-    color: #92400e;
+    background-color: rgba(212, 180, 106, 0.15);
+    color: var(--dark-gray);
+    border: 1px solid rgba(212, 180, 106, 0.3);
 }
 
 .alert-success {
-    background-color: rgba(5, 150, 105, 0.1);
-    color: #064e3b;
+    background-color: rgba(143, 174, 95, 0.15);
+    color: var(--dark-gray);
+    border: 1px solid rgba(143, 174, 95, 0.3);
 }
 
 .alert-danger {
-    background-color: rgba(220, 38, 38, 0.1);
-    color: #991b1b;
+    background-color: rgba(184, 95, 95, 0.15);
+    color: var(--dark-gray);
+    border: 1px solid rgba(184, 95, 95, 0.3);
 }
 
 /* Pagination */
