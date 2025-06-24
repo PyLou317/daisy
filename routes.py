@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 from sqlalchemy import func, case
 from app import db, login_manager
 from models import User, Contractor, ReviewQueue, UploadHistory
-from forms import LoginForm, RegisterForm, ContractorForm, UploadForm
+from forms import LoginForm, RegisterForm, ContractorForm, UploadForm, OnboardingForm
 from utils import parse_date, allowed_file, process_csv_upload
 
 # User loader for Flask-Login
@@ -24,11 +24,15 @@ main_bp = Blueprint('main', __name__)
 def index():
     if not current_user.is_authenticated:
         return render_template('auth/login.html', form=LoginForm())
+    if not current_user.onboarding_completed:
+        return redirect(url_for('auth.onboarding'))
     return redirect(url_for('main.dashboard'))
 
 @main_bp.route('/dashboard')
 @login_required
 def dashboard():
+    if not current_user.onboarding_completed:
+        return redirect(url_for('auth.onboarding'))
     from datetime import datetime, timedelta
     from dateutil.relativedelta import relativedelta
     
@@ -161,42 +165,65 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
+        if not current_user.onboarding_completed:
+            return redirect(url_for('auth.onboarding'))
         return redirect(url_for('main.dashboard'))
     
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        user = User.query.filter_by(email=form.email.data).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             next_page = request.args.get('next')
+            if not current_user.onboarding_completed:
+                return redirect(url_for('auth.onboarding'))
             if not next_page or not next_page.startswith('/'):
                 next_page = url_for('main.dashboard')
             return redirect(next_page)
-        flash('Invalid username or password', 'error')
+        flash('Invalid email or password', 'error')
     
     return render_template('auth/login.html', form=form)
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
+        if not current_user.onboarding_completed:
+            return redirect(url_for('auth.onboarding'))
         return redirect(url_for('main.dashboard'))
     
     form = RegisterForm()
     if form.validate_on_submit():
         user = User(
-            username=form.username.data,
             email=form.email.data,
-            first_name=form.first_name.data,
-            last_name=form.last_name.data
+            onboarding_completed=False
         )
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
         
-        flash('Registration successful! Please log in.', 'success')
-        return redirect(url_for('auth.login'))
+        # Log the user in immediately after registration
+        login_user(user)
+        return redirect(url_for('auth.onboarding'))
     
     return render_template('auth/register.html', form=form)
+
+@auth_bp.route('/onboarding', methods=['GET', 'POST'])
+@login_required
+def onboarding():
+    if current_user.onboarding_completed:
+        return redirect(url_for('main.dashboard'))
+    
+    form = OnboardingForm()
+    if form.validate_on_submit():
+        current_user.first_name = form.first_name.data
+        current_user.last_name = form.last_name.data
+        current_user.onboarding_completed = True
+        db.session.commit()
+        
+        flash(f'Welcome to StaffingPro, {current_user.first_name}!', 'success')
+        return redirect(url_for('main.dashboard'))
+    
+    return render_template('auth/onboarding.html', form=form)
 
 @auth_bp.route('/logout')
 @login_required

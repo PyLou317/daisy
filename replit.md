@@ -114,6 +114,13 @@ StaffingPro is a Flask-based web application designed for staffing agencies to m
 - Debug mode disabled in production
 
 ## Recent Changes
+- June 24, 2025: Simplified registration and added onboarding flow
+  - Removed username requirement, now only requires email and password
+  - Added onboarding flow to collect user's name after registration
+  - Updated authentication to use email instead of username
+  - Enhanced user display throughout app to use first name
+  - Added onboarding_completed flag to prevent dashboard access before setup
+
 - June 23, 2025: Added comprehensive analytics and quarterly forecasting features
   - New Analytics page showing contracts ending this quarter and next quarter
   - Client distribution analysis with contractor counts and spread totals

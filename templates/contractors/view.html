@@ -137,7 +137,7 @@
                             {% if contractor.creator %}
                             <tr>
                                 <td class="fw-bold">Created By:</td>
-                                <td>{{ contractor.creator.full_name or contractor.creator.username }}</td>
+                                <td>{{ contractor.creator.display_name }}</td>
                             </tr>
                             {% endif %}
                         </table>

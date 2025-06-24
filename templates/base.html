@@ -62,7 +62,7 @@
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <i data-feather="user" class="me-1"></i>{{ current_user.full_name or current_user.username }}
+                            <i data-feather="user" class="me-1"></i>{{ current_user.display_name }}
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">

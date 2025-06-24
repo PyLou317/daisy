@@ -9,11 +9,11 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     first_name = db.Column(db.String(50))
     last_name = db.Column(db.String(50))
+    onboarding_completed = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
     
@@ -26,6 +26,10 @@ class User(UserMixin, db.Model):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}".strip()
+    
+    @property
+    def display_name(self):
+        return self.first_name if self.first_name else self.email.split('@')[0]
 
 class Contractor(db.Model):
     __tablename__ = 'contractors'

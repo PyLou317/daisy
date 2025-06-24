@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to StaffingPro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <i data-feather="briefcase" class="text-primary" style="width: 48px; height: 48px;"></i>
+                    <h2 class="mt-3 text-primary">Welcome to StaffingPro!</h2>
+                    <p class="text-muted">Let's get you set up with a quick introduction</p>
+                </div>
+                
+                <div class="alert alert-info mb-4">
+                    <i data-feather="info" class="me-2"></i>
+                    <strong>Almost there!</strong> We just need your name to personalize your experience.
+                </div>
+                
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.first_name.label(class="form-label") }}
+                            {{ form.first_name(class="form-control", placeholder="Enter your first name") }}
+                            {% if form.first_name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.first_name.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.last_name.label(class="form-label") }}
+                            {{ form.last_name(class="form-control", placeholder="Enter your last name") }}
+                            {% if form.last_name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.last_name.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">What you can do with StaffingPro:</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i data-feather="check-circle" class="text-success me-2" style="width: 16px; height: 16px;"></i>
+                                Track contractor spreads and quarterly forecasts
+                            </li>
+                            <li class="mb-2">
+                                <i data-feather="check-circle" class="text-success me-2" style="width: 16px; height: 16px;"></i>
+                                Upload weekly CSV reports for automated updates
+                            </li>
+                            <li class="mb-2">
+                                <i data-feather="check-circle" class="text-success me-2" style="width: 16px; height: 16px;"></i>
+                                Analyze client distribution and contract endings
+                            </li>
+                            <li class="mb-2">
+                                <i data-feather="check-circle" class="text-success me-2" style="width: 16px; height: 16px;"></i>
+                                Manage contractor information with detailed profiles
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i data-feather="arrow-right" class="me-1"></i>Complete Setup & Continue
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

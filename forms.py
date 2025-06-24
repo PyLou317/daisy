@@ -6,18 +6,12 @@ from wtforms.widgets import TextArea
 from models import User
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
 
 class RegisterForm(FlaskForm):
-    username = StringField('Username', validators=[
-        DataRequired(), 
-        Length(min=4, max=20)
-    ])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    first_name = StringField('First Name', validators=[DataRequired()])
-    last_name = StringField('Last Name', validators=[DataRequired()])
     password = PasswordField('Password', validators=[
         DataRequired(),
         Length(min=6)
@@ -27,15 +21,14 @@ class RegisterForm(FlaskForm):
         EqualTo('password')
     ])
     
-    def validate_username(self, username):
-        user = User.query.filter_by(username=username.data).first()
-        if user:
-            raise ValidationError('Username already exists. Please choose a different one.')
-    
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError('Email already registered. Please choose a different one.')
+
+class OnboardingForm(FlaskForm):
+    first_name = StringField('First Name', validators=[DataRequired()])
+    last_name = StringField('Last Name', validators=[DataRequired()])
 
 class ContractorForm(FlaskForm):
     talent_name = StringField('Talent Name', validators=[DataRequired()])
